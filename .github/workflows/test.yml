@@ -90,11 +90,12 @@ jobs:
             "
 
   test-pios:
-    name: Test Raspbian ${{ matrix.docker-tag }}
+    name: Test Raspbian ${{ matrix.docker-tag }} (${{ matrix.pyenv }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
         docker-tag: ['stretch-2018-03-13', 'buster-2021-03-25']
+        pyenv: ['virtualenv', 'system']
       fail-fast: false
     services:
       rpios:
@@ -129,7 +130,8 @@ jobs:
           port:  ${{ job.services.rpios.ports[5022] }}
           # Purposely skip apt update, install version from image stale index
           script: sudo apt-get install -y python3-virtualenv
-      - name: Create venv and install Python dependencies
+      - name: Create virtual environment and always activate it
+        if: matrix.pyenv == 'virtualenv'
         uses: appleboy/ssh-action@master
         with:
           host: rpios
@@ -141,9 +143,17 @@ jobs:
             python3 -m virtualenv ~/mu/.venv -v --python=python3 --system-site-packages
             echo "source ~/mu/.venv/bin/activate" > ~/.bashrc_new && cat ~/.bashrc >> ~/.bashrc_new
             rm ~/.bashrc && mv ~/.bashrc_new ~/.bashrc
-            source .venv/bin/activate
-            python -m pip list
-            python -m pip install ."[dev]"
+      - name: Install Python dependencies
+        uses: appleboy/ssh-action@master
+        with:
+          host: rpios
+          username: pi
+          password: raspberry
+          port:  ${{ job.services.rpios.ports[5022] }}
+          command_timeout: 20m
+          script: |
+            python3 -m pip list
+            python3 -m pip install ."[dev]"
       - name: Environment info
         uses: appleboy/ssh-action@master
         with:
@@ -165,4 +175,4 @@ jobs:
           password: raspberry
           port:  ${{ job.services.rpios.ports[5022] }}
           command_timeout: 25m
-          script: xvfb-run python make.py check
+          script: xvfb-run python3 make.py check
