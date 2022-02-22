@@ -169,7 +169,7 @@ class ButtonBar(QToolBar):
         Compact button bar for when window is very small.
         """
         font_size = min(DEFAULT_FONT_SIZE, width // 80)
-        icon_size = min(64, width // 24)
+        icon_size = min(80, width // 18)
         self.setIconSize(QSize(icon_size, icon_size))
         stylesheet = "QWidget{font-size: " + str(font_size) + "px;}"
         self.setStyleSheet(stylesheet)
@@ -338,10 +338,11 @@ class Window(QMainWindow):
         """
         Trap a CTRL-scroll event so the user is able to zoom in and out.
         """
-        modifiers = QApplication.keyboardModifiers()
-        if modifiers == Qt.ControlModifier:
-            zoom = event.angleDelta().y() > 0
-            if zoom:
+        ### modifiers = QApplication.keyboardModifiers()
+        ### if modifiers == Qt.ControlModifier:
+        if event.modifiers() & Qt.ControlModifier:
+            zoom_in = event.angleDelta().y() > 0
+            if zoom_in:
                 self.zoom_in()
             else:
                 self.zoom_out()
@@ -1138,7 +1139,7 @@ class Window(QMainWindow):
         self.update_title()
         self.read_only_tabs = False
         screen_width, screen_height = self.screen_size()
-        self.setMinimumSize(screen_width // 2, screen_height // 2)
+        self.setMinimumSize(screen_width // 4, screen_height // 4)
         self.setTabPosition(Qt.AllDockWidgetAreas, QTabWidget.North)
         self.widget = QWidget()
         widget_layout = QVBoxLayout()

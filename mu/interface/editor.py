@@ -189,6 +189,7 @@ class EditorPane(QsciScintilla):
         self.setIndentationGuides(True)
         self.setBackspaceUnindents(True)
         self.setTabWidth(4)
+        self.setEdgeMode(self.EDGE_LINE)  # EDGE_NONE, EDGE_LINE, EDGE_BACKGROUND
         self.setEdgeColumn(79)
         self.setMarginLineNumbers(0, True)
         self.setMarginWidth(0, 50)
