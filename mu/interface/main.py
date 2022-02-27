@@ -1089,9 +1089,6 @@ class Window(QMainWindow):
         """
         Returns an (width, height) tuple with the screen geometry.
         """
-        # QDesktopWidget class is obsolete, as of
-        # https://doc.qt.io/qt-5/qdesktopwidget.html
-        # QDesktopWidget().screenGeometry() returns geometry of 
         screen = QDesktopWidget().screenGeometry()
         return screen.width(), screen.height()
 
@@ -1117,10 +1114,9 @@ class Window(QMainWindow):
         if y and (y <= 0 or y > screen_height):
             y = None
         
-        # Reposition window, if off-screen
-        # Note: not prepared for multi-display setups. If the window is placed
-        # on secondary display, coordinates will result negative and will force
-        # repositioning
+        # Note: not yet prepared for multi-display setups. If the window is
+        # placed on secondary display, coordinates will result offset value and
+        # will force repositioning to center of main screen.
         x = (screen_width - size.width()) // 2 if x is None else x
         y = (screen_height - size.height()) // 2 if y is None else y
         self.move(x, y)
