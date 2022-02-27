@@ -169,8 +169,47 @@ class ButtonBar(QToolBar):
         """
         Compact button bar for when window is very small.
         """
+        
+        # Try getting MAX_ICON_SIZE_PX
+        try:
+            from mu.config import MAX_ICON_SIZE_PX
+        except Exception as e:
+            MAX_ICON_SIZE_PX = 64
+            logger.debug(''.join((str(e), 
+                "; default value of {} applied".format(MAX_ICON_SIZE_PX))
+                ))
+
+        try:
+            from mu.config import MAX_ICON_SIZE_REL_WIDTH
+        except Exception as e:
+            MAX_ICON_SIZE_REL_WIDTH = 24
+            logger.debug(''.join((str(e), 
+                "; default value of {} applied".format(MAX_ICON_SIZE_REL_WIDTH))
+                ))
+            
+        try:
+            from mu.config import MAX_ICON_SIZE_REL_HEIGHT
+        except Exception as e:
+            MAX_ICON_SIZE_REL_HEIGHT = 24
+            logger.debug(''.join((str(e), 
+                "; default value of {} applied".format(MAX_ICON_SIZE_REL_HEIGHT))
+                ))
+
+        try:
+            from mu.config import MAX_FONT_SIZE_REL_ICON
+        except Exception as e:
+            MAX_FONT_SIZE_REL_ICON = 4
+            logger.debug(''.join((str(e), 
+                "; default value of {} applied".format(MAX_FONT_SIZE_REL_ICON))
+                ))
+            
+        icon_size = min(MAX_ICON_SIZE_PX,
+                        width // MAX_ICON_SIZE_REL_WIDTH, 
+                        height // MAX_ICON_SIZE_REL_HEIGHT
+                        )
         font_size = min(DEFAULT_FONT_SIZE, width // 80)
-        icon_size = min(80, width // 18)
+        font_size = icon_size // MAX_FONT_SIZE_REL_ICON
+        
         self.setIconSize(QSize(icon_size, icon_size))
         stylesheet = "QWidget{font-size: " + str(font_size) + "px;}"
         self.setStyleSheet(stylesheet)

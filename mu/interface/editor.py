@@ -199,7 +199,6 @@ class EditorPane(QsciScintilla):
                 "; default value of {} applied".format(MAX_LINE_LENGTH))
                 ))
         
-        print("TESTE: ", LONG_LINES_EDGE_MODE, MAX_LINE_LENGTH)
         self.setEdgeMode(LONG_LINES_EDGE_MODE)
         self.setEdgeColumn(MAX_LINE_LENGTH)
 
