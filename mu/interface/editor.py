@@ -174,6 +174,35 @@ class EditorPane(QsciScintilla):
         if not event.isAccepted():
             super().dropEvent(event)
 
+    def _set_edge_column(self):
+        """Set editor's vertical line at column 79 or otherwise defined in
+        config.MAX_LINE_LENGTH
+        """
+        
+        # Try getting LONG_LINES_EDGE_MODE from config.py
+        try:
+            from mu.config import LONG_LINES_EDGE_MODE
+        except Exception as e:
+            LONG_LINES_EDGE_MODE = 0  # default value; lines are not marked
+            logger.debug(''.join((str(e), 
+                "; default value of {} applied".format(LONG_LINES_EDGE_MODE))
+                ))
+        
+        self.setEdgeMode(LONG_LINES_EDGE_MODE)
+
+        # Try getting MAX_LINE_LENGTH from config.py
+        try:
+            from mu.config import MAX_LINE_LENGTH
+        except Exception as e:
+            MAX_LINE_LENGTH = 79  # default value; avoid 80+ chars per line
+            logger.debug(''.join((str(e), 
+                "; default value of {} applied".format(MAX_LINE_LENGTH))
+                ))
+        
+        print("TESTE: ", LONG_LINES_EDGE_MODE, MAX_LINE_LENGTH)
+        self.setEdgeMode(LONG_LINES_EDGE_MODE)
+        self.setEdgeColumn(MAX_LINE_LENGTH)
+
     def configure(self):
         """
         Set up the editor component.
@@ -189,8 +218,7 @@ class EditorPane(QsciScintilla):
         self.setIndentationGuides(True)
         self.setBackspaceUnindents(True)
         self.setTabWidth(4)
-        self.setEdgeMode(self.EDGE_LINE)  # EDGE_NONE, EDGE_LINE, EDGE_BACKGROUND
-        self.setEdgeColumn(79)
+        self._set_edge_column()
         self.setMarginLineNumbers(0, True)
         self.setMarginWidth(0, 50)
         self.setBraceMatching(QsciScintilla.SloppyBraceMatch)

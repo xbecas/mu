@@ -1089,6 +1089,9 @@ class Window(QMainWindow):
         """
         Returns an (width, height) tuple with the screen geometry.
         """
+        # QDesktopWidget class is obsolete, as of
+        # https://doc.qt.io/qt-5/qdesktopwidget.html
+        # QDesktopWidget().screenGeometry() returns geometry of 
         screen = QDesktopWidget().screenGeometry()
         return screen.width(), screen.height()
 
@@ -1107,11 +1110,17 @@ class Window(QMainWindow):
         h = int(screen_height * 0.8) if h is None else h
         self.resize(w, h)
         size = self.geometry()
+        
         # Ensure the window isn't added off the screen.
         if x and (x <= 0 or x > screen_width):
             x = None
         if y and (y <= 0 or y > screen_height):
             y = None
+        
+        # Reposition window, if off-screen
+        # Note: not prepared for multi-display setups. If the window is placed
+        # on secondary display, coordinates will result negative and will force
+        # repositioning
         x = (screen_width - size.width()) // 2 if x is None else x
         y = (screen_height - size.height()) // 2 if y is None else y
         self.move(x, y)
@@ -1136,6 +1145,68 @@ class Window(QMainWindow):
         """
         self.current_tab.show_annotations()
 
+    def _setup_min_window_size(self):
+        """Set window minimum size, as defined in
+        https://doc.qt.io/qt-5/qwidget.html#setMinimumSize-1
+        """
+
+        screen_width, screen_height = self.screen_size()
+
+        # Try getting MIN_WINDOW_WIDTH and MIN_WINDOW_HEIGHT from config.py
+        try:
+            from mu.config import MIN_WINDOW_WIDTH
+        except Exception as e:
+            MIN_WINDOW_WIDTH = 2.0
+            logger.debug(''.join((str(e), 
+                "; default value of {} applied".format(MIN_WINDOW_WIDTH))
+                ))
+
+        try:
+            from mu.config import MIN_WINDOW_HEIGHT
+        except Exception as e:
+            MIN_WINDOW_HEIGHT = 2.0
+            logger.debug(''.join((str(e), 
+                "; default value of {} applied".format(MIN_WINDOW_HEIGHT))
+                ))
+
+        # Apply relative factor if value is float, absolute value if integer
+        if isinstance(MIN_WINDOW_WIDTH, float):
+            setup_width = screen_width // MIN_WINDOW_WIDTH
+        elif isinstance(MIN_WINDOW_WIDTH, int):
+            setup_width = MIN_WINDOW_WIDTH
+        else:
+            setup_width = screen_width // 2.0
+        
+        if isinstance(MIN_WINDOW_HEIGHT, float):
+            setup_height = screen_height // MIN_WINDOW_HEIGHT
+        elif isinstance(MIN_WINDOW_HEIGHT, int):
+            setup_height = MIN_WINDOW_HEIGHT
+        else:
+            setup_height = screen_height // 2.0
+
+        # Apply absolute minimum width and height
+        ABS_MIN_WINDOW_WIDTH = 600
+        if setup_width < ABS_MIN_WINDOW_WIDTH:
+            logger.info(
+                "config.MIN_WINDOW_WIDTH defined as {}; "
+                "setup_width resulted in {}px; "
+                "absolute minimum width of {}px applied."
+                .format(MIN_WINDOW_WIDTH, setup_width, ABS_MIN_WINDOW_WIDTH)
+                )
+            setup_width = ABS_MIN_WINDOW_WIDTH
+
+        ABS_MIN_WINDOW_HEIGHT = 400
+        if setup_height < ABS_MIN_WINDOW_HEIGHT:
+            logger.info(
+                "config.MIN_WINDOW_HEIGHT defined as {}; "
+                "setup_height resulted in {}px; "
+                "absolute minimum height of {}px applied."
+                .format(MIN_WINDOW_HEIGHT, setup_height, ABS_MIN_WINDOW_HEIGHT)
+                )
+            setup_height = ABS_MIN_WINDOW_HEIGHT
+
+        self.setMinimumSize(setup_width, setup_height)
+
     def setup(self, breakpoint_toggle, theme):
         """
         Sets up the window.
@@ -1149,8 +1220,9 @@ class Window(QMainWindow):
         self.setWindowIcon(load_icon(self.icon))
         self.update_title()
         self.read_only_tabs = False
-        screen_width, screen_height = self.screen_size()
-        self.setMinimumSize(screen_width // 4, screen_height // 4)
+
+        self._setup_min_window_size()
+                
         self.setTabPosition(Qt.AllDockWidgetAreas, QTabWidget.North)
         self.widget = QWidget()
         widget_layout = QVBoxLayout()
