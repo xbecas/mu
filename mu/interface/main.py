@@ -1136,21 +1136,54 @@ class Window(QMainWindow):
         """
         self.current_tab.show_annotations()
 
-    def setup(self, breakpoint_toggle, theme):
+    def setup(self, breakpoint_toggle, theme, user_settings):
         """
         Sets up the window.
 
         Defines the various attributes of the window and defines how the user
         interface is laid out.
         """
+
+        def window_size():
+            
+            def get_dimension(user_value, screen_resolution):
+                """"""
+                
+                if user_value is None:
+                    user_value = 0.50
+                elif not isinstance(user_value, (int, float)):
+                    raise ValueError(f"Value has to be an int or a float, not a {type(user_value)}")
+            
+                # If value is a float make it a multiplication factor
+                # of screen-resolution.
+                if isinstance(user_value, float):
+                    user_value = int(user_value * screen_resolution)
+                
+                # Limit result to screen resolution
+                user_value = min(user_value, screen_resolution)
+                
+                return user_value
+                
+            screen_width, screen_height = self.screen_size()
+
+            # Parameters in settings.json
+            user_window_min_width = user_settings.get('WINDOW_MINIMUM_WIDTH')
+            user_window_min_height = user_settings.get('WINDOW_MINIMUM_HEIGTH')
+   
+            window_width = get_dimension(user_window_min_width, screen_width)
+            window_height = get_dimension(user_window_min_height, screen_height)
+
+            return window_width, window_height
+        
         self.theme = theme
         self.breakpoint_toggle = breakpoint_toggle
         # Give the window a default icon, title and minimum size.
         self.setWindowIcon(load_icon(self.icon))
         self.update_title()
         self.read_only_tabs = False
-        screen_width, screen_height = self.screen_size()
-        self.setMinimumSize(screen_width // 4, screen_height // 4)
+
+        window_width, window_height = window_size()
+        self.setMinimumSize(window_width, window_height)
         self.setTabPosition(Qt.AllDockWidgetAreas, QTabWidget.North)
         self.widget = QWidget()
         widget_layout = QVBoxLayout()

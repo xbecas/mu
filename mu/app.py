@@ -351,7 +351,7 @@ def run():
     editor.setup(setup_modes(editor, editor_window))
     # Setup the window.
     editor_window.closeEvent = editor.quit
-    editor_window.setup(editor.debug_toggle_breakpoint, editor.theme)
+    editor_window.setup(editor.debug_toggle_breakpoint, editor.theme, settings.settings)
     # Connect the various UI elements in the window to the editor.
     editor_window.connect_tab_rename(editor.rename_tab, "Ctrl+Shift+S")
     editor_window.connect_find_replace(editor.find_replace, "Ctrl+F")
