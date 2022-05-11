@@ -1202,12 +1202,12 @@ class Window(QMainWindow):
         widget_layout = QVBoxLayout()
         self.widget.setLayout(widget_layout)
         
-        self.button_bar = ButtonBar(self.widget, self.user_settings.get('ButtonBar', {}))
+        self.button_bar = ButtonBar(self.widget)
         
         self.tabs = FileTabs()
         self.setCentralWidget(self.tabs)
         
-        self.status_bar = StatusBar(parent=self, self.user_settings.get('StatusBar', {}))
+        self.status_bar = StatusBar(parent=self)
         self.setStatusBar(self.status_bar)
         
         self.addToolBar(self.button_bar)
