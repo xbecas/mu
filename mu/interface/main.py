@@ -169,6 +169,10 @@ class ButtonBar(QToolBar):
         """
         Compact button bar for when window is very small.
         """
+
+        user_buttonbar = self.user_settings.get('ButtonBar', {})
+        user_window_min_width = user_buttonbar.get('MINIMUM_WIDTH', 0.50)
+
         font_size = min(DEFAULT_FONT_SIZE, width // 80)
         icon_size = min(80, width // 18)
         self.setIconSize(QSize(icon_size, icon_size))
@@ -1144,15 +1148,24 @@ class Window(QMainWindow):
         interface is laid out.
         """
 
+        # Parameters in settings.json passed on from app.py
+        self.user_settings = user_settings
+
         def window_size():
             
             def get_dimension(user_value, screen_resolution):
-                """"""
+                """Define window's minimum resolution.
                 
-                if user_value is None:
-                    user_value = 0.50
-                elif not isinstance(user_value, (int, float)):
-                    raise ValueError(f"Value has to be an int or a float, not a {type(user_value)}")
+                Based on settings or default values.
+                - Float represents a screen resolution multiplication factor
+                - Integer represents pixels (limited to the screen resolution)
+                """
+                
+                if not isinstance(user_value, (int, float)):
+                    raise ValueError(
+                        f"Value has to be an int or a float, not a "
+                        f"{type(user_value)}"
+                        )
             
                 # If value is a float make it a multiplication factor
                 # of screen-resolution.
@@ -1166,9 +1179,9 @@ class Window(QMainWindow):
                 
             screen_width, screen_height = self.screen_size()
 
-            # Parameters in settings.json
-            user_window_min_width = user_settings.get('WINDOW_MINIMUM_WIDTH')
-            user_window_min_height = user_settings.get('WINDOW_MINIMUM_HEIGTH')
+            user_window = self.user_settings.get('Window', {})
+            user_window_min_width = user_window.get('MINIMUM_WIDTH', 0.50)
+            user_window_min_height = user_window.get('MINIMUM_HEIGTH', 0.50)
    
             window_width = get_dimension(user_window_min_width, screen_width)
             window_height = get_dimension(user_window_min_height, screen_height)
@@ -1188,11 +1201,15 @@ class Window(QMainWindow):
         self.widget = QWidget()
         widget_layout = QVBoxLayout()
         self.widget.setLayout(widget_layout)
-        self.button_bar = ButtonBar(self.widget)
+        
+        self.button_bar = ButtonBar(self.widget, self.user_settings.get('ButtonBar', {}))
+        
         self.tabs = FileTabs()
         self.setCentralWidget(self.tabs)
-        self.status_bar = StatusBar(parent=self)
+        
+        self.status_bar = StatusBar(parent=self, self.user_settings.get('StatusBar', {}))
         self.setStatusBar(self.status_bar)
+        
         self.addToolBar(self.button_bar)
         self.show()
 
@@ -1400,6 +1417,7 @@ class StatusBar(QStatusBar):
 
     def __init__(self, parent=None, mode="python"):
         super().__init__(parent)
+      
         self.mode = mode
         self.msg_duration = 5
 
