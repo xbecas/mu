@@ -169,6 +169,10 @@ class ButtonBar(QToolBar):
         """
         Compact button bar for when window is very small.
         """
+
+        user_buttonbar = self.user_settings.get('ButtonBar', {})
+        user_window_min_width = user_buttonbar.get('MINIMUM_WIDTH', 0.50)
+
         font_size = min(DEFAULT_FONT_SIZE, width // 80)
         icon_size = min(80, width // 18)
         self.setIconSize(QSize(icon_size, icon_size))
@@ -1413,6 +1417,7 @@ class StatusBar(QStatusBar):
 
     def __init__(self, parent=None, mode="python"):
         super().__init__(parent)
+      
         self.mode = mode
         self.msg_duration = 5
 
