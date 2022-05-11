@@ -170,9 +170,6 @@ class ButtonBar(QToolBar):
         Compact button bar for when window is very small.
         """
 
-        user_buttonbar = self.user_settings.get('ButtonBar', {})
-        user_window_min_width = user_buttonbar.get('MINIMUM_WIDTH', 0.50)
-
         font_size = min(DEFAULT_FONT_SIZE, width // 80)
         icon_size = min(80, width // 18)
         self.setIconSize(QSize(icon_size, icon_size))
@@ -1140,7 +1137,7 @@ class Window(QMainWindow):
         """
         self.current_tab.show_annotations()
 
-    def setup(self, breakpoint_toggle, theme, user_settings):
+    def setup(self, breakpoint_toggle, theme, user_settings=None):
         """
         Sets up the window.
 
@@ -1149,7 +1146,7 @@ class Window(QMainWindow):
         """
 
         # Parameters in settings.json passed on from app.py
-        self.user_settings = user_settings
+        self.user_settings = user_settings if user_settings else {}
 
         def window_size():
             
