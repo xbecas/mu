@@ -340,9 +340,9 @@ class Window(QMainWindow):
         """
         Trap a CTRL-scroll event so the user is able to zoom in and out.
         """
-        ### modifiers = QApplication.keyboardModifiers()
-        ### if modifiers == Qt.ControlModifier:
-        if event.modifiers() & Qt.ControlModifier:
+        modifiers = QApplication.keyboardModifiers()
+        if modifiers == Qt.ControlModifier:
+        ### if event.modifiers() & Qt.ControlModifier:
             zoom_in = event.angleDelta().y() > 0
             if zoom_in:
                 self.zoom_in()
